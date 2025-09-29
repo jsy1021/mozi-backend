@@ -8,6 +8,8 @@ import org.iebbuda.mozi.domain.product.dto.DepositOptionResponse;
 import org.iebbuda.mozi.domain.product.dto.DepositResponse;
 import org.iebbuda.mozi.domain.product.dto.SavingResponse;
 import org.iebbuda.mozi.domain.product.mapper.DepositMapper;
+import org.iebbuda.mozi.common.response.BaseException;
+import org.iebbuda.mozi.common.response.BaseResponseStatus;
 
 import org.springframework.cache.annotation.Cacheable;
 
@@ -50,7 +52,7 @@ public class DepositQueryService {
         System.out.println("getDepositById 실행 시간: " + (end - start) + "ms");
 
         if (product == null) {
-            throw new RuntimeException("예금 상품을 찾을 수 없습니다. (id=" + id + ")");
+            throw new BaseException(BaseResponseStatus.USER_NOT_FOUND); // 도메인 전용 상태가 있다면 교체 권장
         }
         return toResponse(product);
     }

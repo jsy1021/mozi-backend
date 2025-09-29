@@ -6,6 +6,8 @@ import org.iebbuda.mozi.domain.product.domain.SavingProduct;
 import org.iebbuda.mozi.domain.product.dto.SavingOptionResponse;
 import org.iebbuda.mozi.domain.product.dto.SavingResponse;
 import org.iebbuda.mozi.domain.product.mapper.SavingMapper;
+import org.iebbuda.mozi.common.response.BaseException;
+import org.iebbuda.mozi.common.response.BaseResponseStatus;
 
 import org.springframework.cache.annotation.Cacheable;
 
@@ -45,7 +47,7 @@ public class SavingQueryService {
         System.out.println("getAllSavings 실행시간 "+(end-start)+" ms");
 
         if (product == null) {
-            throw new RuntimeException("예금 상품을 찾을 수 없습니다. (id=" + id + ")");
+            throw new BaseException(BaseResponseStatus.USER_NOT_FOUND); // 도메인 전용 상태가 있다면 교체 권장
         }
         return toResponse(product);
     }
