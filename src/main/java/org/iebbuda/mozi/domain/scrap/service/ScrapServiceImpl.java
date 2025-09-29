@@ -29,7 +29,7 @@ public class ScrapServiceImpl implements ScrapService {
             vo.setUserId(userId);
             vo.setPlcyNo(plcyNo);
             policyScrapMapper.insertScrap(vo);
-            System.out.println("스크랩 시도: userId=" + userId + ", plcyNo=" + plcyNo);
+            log.info("스크랩 시도 - userId: {}, plcyNo: {}", userId, plcyNo);
         }
     }
 
@@ -45,7 +45,7 @@ public class ScrapServiceImpl implements ScrapService {
 
     @Override
     public List<String> getScrapedPolicyNos(int userId) {
-        System.out.println("[DEBUG] getScrapedPolicyNos 호출됨 - userId = " + userId);
+        log.debug("getScrapedPolicyNos 호출됨 - userId: {}", userId);
         return policyScrapMapper.getScrapPlcyNos(userId);
     }
 

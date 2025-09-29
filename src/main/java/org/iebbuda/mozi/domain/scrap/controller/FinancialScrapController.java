@@ -1,6 +1,7 @@
 package org.iebbuda.mozi.domain.scrap.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.iebbuda.mozi.domain.product.dto.DepositResponse;
 import org.iebbuda.mozi.domain.product.dto.SavingResponse;
 import org.iebbuda.mozi.domain.scrap.dto.DepositScrapDto;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/scrap/finance")
 @RequiredArgsConstructor
+@Log4j2
 public class FinancialScrapController {
 
     private final FinancialScrapService financialScrapService;
@@ -26,7 +28,7 @@ public class FinancialScrapController {
     @GetMapping
     public ResponseEntity<List<FinancialScrapDto>> getUserScraps(@AuthenticationPrincipal CustomUser user) {
         long userId= (long) user.getUser().getUserId();
-        System.out.println("userId체크: "+userId);
+        log.info("userId체크: {}", userId);
         return ResponseEntity.ok(financialScrapService.getUserScraps(userId));
     }
 

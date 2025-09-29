@@ -1,6 +1,7 @@
 package org.iebbuda.mozi.domain.product.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import org.iebbuda.mozi.domain.product.domain.SavingProduct;
 import org.iebbuda.mozi.domain.product.dto.SavingOptionResponse;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class SavingQueryService {
 
     private final SavingMapper savingMapper;
@@ -30,7 +32,7 @@ public class SavingQueryService {
         long start=System.currentTimeMillis();//⬅️ 시작 시간 측정
         List<SavingProduct>products=savingMapper.findAllWithOptions();
         long end=System.currentTimeMillis();// ⬅️ 종료 시간 측정
-        System.out.println("getAllSavings 실행시간 "+(end-start)+" ms");
+        log.info("getAllSavings 실행시간 {} ms", (end-start));
 
         return products.stream().map(this::toResponse).toList();
     }
@@ -44,7 +46,7 @@ public class SavingQueryService {
         SavingProduct product=savingMapper.findByIdWithOptions(id);
         long end=System.currentTimeMillis();
 
-        System.out.println("getAllSavings 실행시간 "+(end-start)+" ms");
+        log.info("getSavingById 실행시간 {} ms", (end-start));
 
         if (product == null) {
             throw new BaseException(BaseResponseStatus.USER_NOT_FOUND); // 도메인 전용 상태가 있다면 교체 권장

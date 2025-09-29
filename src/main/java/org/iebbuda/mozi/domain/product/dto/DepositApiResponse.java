@@ -2,6 +2,7 @@ package org.iebbuda.mozi.domain.product.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.iebbuda.mozi.domain.product.domain.DepositOption;
 import org.iebbuda.mozi.domain.product.domain.DepositProduct;
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 @Data
+@Log4j2
 public class DepositApiResponse {
 
     @JsonProperty("result")
@@ -139,7 +141,7 @@ public class DepositApiResponse {
                     );
                 } else {
                     // 알 수 없는 형식 경고
-                    System.out.println("알 수 없는 날짜 형식: " + this.finCoSubmDay);
+                    log.warn("알 수 없는 날짜 형식: {}", this.finCoSubmDay);
                 }
             }
 
