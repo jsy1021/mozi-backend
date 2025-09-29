@@ -28,8 +28,9 @@ tasks.withType(JavaCompile) {
 
 dependencies {
     // 스프링
-    implementation ("org.springframework:spring-context:${springVersion}")
-            { exclude group: 'commons-logging', module: 'commons-logging' }
+    implementation ("org.springframework:spring-context:${springVersion}") {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
     implementation "org.springframework:spring-webmvc:${springVersion}"
     implementation 'javax.inject:javax.inject:1'
 
@@ -38,12 +39,11 @@ dependencies {
     implementation 'org.aspectj:aspectjweaver:1.9.20'
 
     // JSP, SERVLET, JSTL
-    implementation('javax.servlet:javax.servlet-api:4.0.1')
-    // compileOnly 'javax.servlet.jsp:jsp-api:2.1'
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     compileOnly 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
     implementation 'javax.servlet:jstl:1.2'
 
-    // Log4j2 Logging
+    // Log4j2 Logging (최신 버전만 유지)
     implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
@@ -55,67 +55,60 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    // Jackson - Json 처리
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.4'
+    // Jackson - Json 처리 (버전 통일)
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
 
-    //mysql
+    // mysql
     implementation 'com.mysql:mysql-connector-j:8.1.0'
-    //Connection Pool
+
+    // Connection Pool
     implementation 'com.zaxxer:HikariCP:2.7.4'
 
-    //스프링 jdbc
+    // 스프링 jdbc & 트랜잭션
     implementation "org.springframework:spring-jdbc:${springVersion}"
-    //트랜잭션
     implementation "org.springframework:spring-tx:${springVersion}"
 
-    //mybatis
+    // MyBatis
     implementation 'org.mybatis:mybatis:3.4.6'
-    //mybatis 와 spring 연결
     implementation 'org.mybatis:mybatis-spring:1.3.2'
 
-    //jdbc 관련 로그
+    // JDBC 관련 로그
     implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4:1.16'
-    implementation 'org.apache.logging.log4j:log4j-api:2.0.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.0.1'
 
     // 테스트
     testImplementation "org.springframework:spring-test:${springVersion}"
-    testCompileOnly"org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
-    //swagger
+    // Swagger
     implementation 'io.springfox:springfox-swagger2:2.9.2'
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
     // 보안
-    implementation("org.springframework.security:spring-security-web:${springSecurityVersion}")
-    implementation("org.springframework.security:spring-security-config:${springSecurityVersion}")
-    implementation("org.springframework.security:spring-security-core:${springSecurityVersion}")
-    implementation("org.springframework.security:spring-security-taglibs:${springSecurityVersion}")
+    implementation "org.springframework.security:spring-security-web:${springSecurityVersion}"
+    implementation "org.springframework.security:spring-security-config:${springSecurityVersion}"
+    implementation "org.springframework.security:spring-security-core:${springSecurityVersion}"
+    implementation "org.springframework.security:spring-security-taglibs:${springSecurityVersion}"
 
-    //JWT 토큰
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    // JWT 토큰
+    implementation "io.jsonwebtoken:jjwt-api:0.11.5"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:0.11.5"
+    implementation "io.jsonwebtoken:jjwt-jackson:0.11.5"
 
-    //@PostConstruct
+    // @PostConstruct
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
 
     // 정책 API 파싱
     implementation 'com.google.code.gson:gson:2.10.1'
 
-
-    //email
+    // 이메일
     implementation 'javax.mail:mail:1.4.7'
-    implementation 'org.springframework:spring-context-support:4.3.30.RELEASE'
-
-    // Jackson
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
-
-
+    implementation "org.springframework:spring-context-support:${springVersion}"
 }
+
 
 
 test {
