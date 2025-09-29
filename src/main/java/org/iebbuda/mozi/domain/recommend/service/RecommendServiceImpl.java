@@ -44,7 +44,12 @@ public class RecommendServiceImpl implements RecommendService {
             long monthsLeft = ChronoUnit.MONTHS.between(LocalDate.now(), goal.getGoalDate().toLocalDate());
             monthsLeft = Math.max(1, monthsLeft); // 최소 1개월 보정
 
-            BigDecimal monthlyNeed = targetAmount.subtract(getTotalBalance(goal.getGoalId(), userId))
+            BigDecimal totalBalance = getTotalBalance(goal.getGoalId(), userId);
+            BigDecimal remaining = targetAmount.subtract(totalBalance);
+            if (remaining.signum() < 0) {
+                remaining = BigDecimal.ZERO;
+            }
+            BigDecimal monthlyNeed = remaining
                     .divide(BigDecimal.valueOf(monthsLeft), RoundingMode.CEILING);
 
             log.info("목표 ID: {}, 달성률: {}, 남은 개월 수: {}, 월 납입 필요액: {}",
@@ -128,11 +133,21 @@ public class RecommendServiceImpl implements RecommendService {
                 }
             }
 
-            // 월 납입 필요액 기반 보정
+            // 월 납입 필요액 기반 보정 (방향 수정)
             if (monthlyNeed.compareTo(new BigDecimal("1000000")) > 0) {
+                // 매달 고액을 모아야 하는 경우 → 적금 선호
+                savingsScore += 10;
+            } else if (monthlyNeed.signum() == 0) {
+                // 이미 목표 달성 → 여유 자금 단기 예치 선호
                 depositScore += 10;
             } else {
-                savingsScore += 10;
+                // 기본적으로 소액 납입은 적금 우세
+                savingsScore += 5;
+            }
+
+            // 극단적 단기 목표 보정 (3개월 이하 → 예금 가산)
+            if (monthsLeft <= 3) {
+                depositScore += 5;
             }
 
             // 비율 기반 개수 계산 (총 4개 보장)
