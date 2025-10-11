@@ -1,12 +1,7 @@
 package org.iebbuda.mozi.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.*;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.JstlView;
 
 @EnableWebMvc
 @ComponentScan(basePackages = {
@@ -40,10 +35,10 @@ public class ServletConfig implements WebMvcConfigurer {
                 .addResourceLocations("/resources/assets/");
 
         registry.addResourceHandler("/images/**")
-                        .addResourceLocations("/resources/images/");
+                .addResourceLocations("/resources/images/");
 
         registry.addResourceHandler("/favicon.ico")
-                        .addResourceLocations("/resources/favicon.ico");
+                .addResourceLocations("/resources/favicon.ico");
 
         // Swagger UI 리소스를 위한 핸들러 설정
         registry.addResourceHandler("/swagger-ui.html")
@@ -60,11 +55,5 @@ public class ServletConfig implements WebMvcConfigurer {
     }
 
 
-    // Servlet 3.0 파일 업로드 사용시
-    @Bean
-    public MultipartResolver multipartResolver() {
-        StandardServletMultipartResolver resolver = new StandardServletMultipartResolver();
-        return resolver;
-    }
 
 }
