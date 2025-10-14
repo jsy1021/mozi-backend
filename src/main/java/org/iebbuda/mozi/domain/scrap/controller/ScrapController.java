@@ -1,6 +1,7 @@
 package org.iebbuda.mozi.domain.scrap.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.iebbuda.mozi.domain.policy.domain.PolicyVO;
 import org.iebbuda.mozi.domain.scrap.service.ScrapService;
 import org.iebbuda.mozi.domain.security.account.domain.CustomUser;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/scrap")
 @RequiredArgsConstructor
+@Log4j2
 public class
 ScrapController {
 
@@ -54,7 +56,7 @@ ScrapController {
     @GetMapping("/policy/list")
     public ResponseEntity<List<PolicyVO>> getScrapedPolicies(@AuthenticationPrincipal CustomUser user) {
         int userId = user.getUser().getUserId();
-        System.out.println("🔥 getScrappedPolicies 요청됨 - userId: " + userId);
+        log.info("getScrappedPolicies 요청 - userId: {}", userId);
         return ResponseEntity.ok(scrabService.getScrapedPolicies(userId));
     }
 }

@@ -167,7 +167,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Map<String, Object> deleteAccounts(List<String> bankCodeList, Integer userId) {
         String mainBankCode = userMapper.getMainBankCodeByUserId(userId);
-        System.out.println(mainBankCode);
+        log.debug("mainBankCode: {}", mainBankCode);
 
         List<BankLoginVO> bankLogins = bankLoginMapper.getByUserID(userId);
         List<String> deletedBanks = new ArrayList<>();
@@ -180,7 +180,7 @@ public class AccountServiceImpl implements AccountService {
                 deletedBanks.add(login.getBankCode());
                 if (login.getBankCode().equals(mainBankCode)) {
                     userMapper.clearMainBankByUserId(userId);
-                    System.out.println("null설정");// main_bank = NULL로 설정하는 메서드
+                    log.debug("main_bank NULL 설정 (userId: {})", userId);
                 }
             }
         }

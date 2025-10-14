@@ -4,6 +4,7 @@ package org.iebbuda.mozi.domain.policy.util;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import lombok.extern.log4j.Log4j2;
 import org.iebbuda.mozi.domain.policy.dto.PolicyDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Log4j2
 public class ApiCaller {
 
     @Value("${youth.api.url}")
@@ -32,7 +34,7 @@ public class ApiCaller {
 
         try {
             String fullUrl = getRequestUrl();
-            System.out.println("🌐 최종 요청 URL: " + fullUrl);
+            log.info("🌐 최종 요청 URL: {}", fullUrl);
 
             URL url = new URL(fullUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -47,11 +49,11 @@ public class ApiCaller {
                     }
                 }
             } else {
-                System.out.println("❗ HTTP Error: " + responseCode);
+                log.warn("HTTP Error: {}", responseCode);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("API 호출 중 예외", e);
         }
 
         return response.toString();
@@ -79,13 +81,13 @@ public class ApiCaller {
                     list.add(dto);
                 }
 
-                System.out.println("파싱된 정책 수: " + list.size());
+                log.info("파싱된 정책 수: {}", list.size());
             } else {
-                System.out.println("'youthPolicyList' 항목이 없습니다.");
+                log.warn("'youthPolicyList' 항목이 없습니다.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("정책 JSON 파싱 중 예외", e);
         }
 
         return list;

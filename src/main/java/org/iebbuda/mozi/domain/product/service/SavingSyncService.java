@@ -24,8 +24,10 @@ public class SavingSyncService {
      * 금융감독원 API에서 적금 데이터를 호출하고 DB에 저장
      */
     @Transactional
-    public void fetchAndSaveSavings() {
+    public SyncResult fetchAndSaveSavings() {
         int pageNo = 1;
+        int saved = 0;
+        int errors = 0;
 
         while (true) {
             // API 호출
@@ -57,8 +59,10 @@ public class SavingSyncService {
                 try {
                     saveOrUpdateSaving(productDTO, optionList);
                     log.info("적금 저장 완료: {}", productDTO.getFinPrdtNm());
+                    saved++;
                 } catch (Exception e) {
                     log.error("적금 저장 실패: {}", productDTO.getFinPrdtNm(), e);
+                    errors++;
                 }
             }
 
@@ -68,6 +72,8 @@ public class SavingSyncService {
             }
             pageNo++;
         }
+        log.info("적금 동기화 집계 saved={}, errors={}", saved, errors);
+        return new SyncResult(errors == 0, saved, errors, "saving sync finished");
     }
 
     /**

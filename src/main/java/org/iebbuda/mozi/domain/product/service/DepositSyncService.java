@@ -24,9 +24,11 @@ public class DepositSyncService {
      * 금융감독원 API에서 정기예금 데이터를 호출하고 DB에 저장
      */
     @Transactional
-    public void fetchAndSaveDeposits() {
+    public SyncResult fetchAndSaveDeposits() {
         int pageNo = 1;
         int totalPageNo=1;
+        int saved = 0;
+        int errors = 0;
 
         while (pageNo <= totalPageNo) {
             // API 호출
@@ -58,8 +60,10 @@ public class DepositSyncService {
                 try {
                     saveOrUpdateDeposit(productDTO, optionList);
                     log.info("정기예금 저장 완료: {}", productDTO.getFinPrdtNm());
+                    saved++;
                 } catch (Exception e) {
                     log.error("정기예금 저장 실패: {}", productDTO.getFinPrdtNm(), e);
+                    errors++;
                 }
             }
 
@@ -69,6 +73,8 @@ public class DepositSyncService {
             }
             pageNo++;
         }
+        log.info("정기예금 동기화 집계 saved={}, errors={}", saved, errors);
+        return new SyncResult(errors == 0, saved, errors, "deposit sync finished");
     }
 
     /**

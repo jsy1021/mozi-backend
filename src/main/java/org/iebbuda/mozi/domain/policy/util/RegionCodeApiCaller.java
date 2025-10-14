@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import java.util.TreeMap;
 @Getter
 @Setter
 @Component
+@Log4j2
 public class RegionCodeApiCaller {
 
     @Value("${zip.api.key}")
@@ -36,7 +38,7 @@ public class RegionCodeApiCaller {
             String encodedKey = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
             return apiUrl + "?serviceKey=" + encodedKey + "&page=" + page + "&perPage=" + perPage + "&type=json";
         } catch (Exception e) {
-            throw new RuntimeException("❗ 인증키 인코딩 실패", e);
+            throw new RuntimeException("인증키 인코딩 실패", e);
         }
     }
 
@@ -46,7 +48,7 @@ public class RegionCodeApiCaller {
 
         try {
             String fullUrl = getRequestUrl(page, perPage);
-            System.out.println("요청 URL: " + fullUrl);
+            log.info("RegionCode 요청 URL: {}", fullUrl);
 
             URL url = new URL(fullUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -65,11 +67,11 @@ public class RegionCodeApiCaller {
 
                 parseJson(response.toString(), regionMap);
             } else {
-                System.out.println("❗ HTTP 오류 코드: " + responseCode);
+                log.warn("RegionCode HTTP 오류 코드: {}", responseCode);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("RegionCode API 호출 중 예외", e);
         }
 
         return regionMap;
@@ -80,7 +82,7 @@ public class RegionCodeApiCaller {
         Map<String, Map<String, String>> totalMap = new HashMap<>();
 
         for (int page = 1; page <= totalPages; page++) {
-            System.out.printf("[ZipCd] (%d/%d) Page Procossing...\n", page, totalPages);
+            log.info("[ZipCd] ({}/{}) Page Processing...", page, totalPages);
 
             Map<String, Map<String, String>> pageMap = fetchZipCodes(page, perPage);
 
@@ -147,8 +149,7 @@ public class RegionCodeApiCaller {
             }
 
         } catch (Exception e) {
-            System.out.println("❗ JSON 파싱 오류");
-            e.printStackTrace();
+            log.error("RegionCode JSON 파싱 오류", e);
         }
     }
 

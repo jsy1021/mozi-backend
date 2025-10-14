@@ -1,6 +1,7 @@
 package org.iebbuda.mozi.domain.product.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import org.iebbuda.mozi.domain.product.domain.DepositProduct;
 import org.iebbuda.mozi.domain.product.domain.SavingProduct;
@@ -8,6 +9,8 @@ import org.iebbuda.mozi.domain.product.dto.DepositOptionResponse;
 import org.iebbuda.mozi.domain.product.dto.DepositResponse;
 import org.iebbuda.mozi.domain.product.dto.SavingResponse;
 import org.iebbuda.mozi.domain.product.mapper.DepositMapper;
+import org.iebbuda.mozi.common.response.BaseException;
+import org.iebbuda.mozi.common.response.BaseResponseStatus;
 
 import org.springframework.cache.annotation.Cacheable;
 
@@ -17,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class DepositQueryService {
 
     private final DepositMapper depositMapper;
@@ -28,12 +32,12 @@ public class DepositQueryService {
     @Cacheable("deposits")
     public List<DepositResponse> getAllDeposits() {
         long start = System.currentTimeMillis(); // ⬅️ 시작 시간 측정
-        System.out.println("DB or API 호출 발생");
+        log.debug("DB or API 호출 발생");
         List<DepositProduct> products = depositMapper.findAllWithOptions();
 
         long end = System.currentTimeMillis();   // ⬅️ 종료 시간 측정
 
-        System.out.println("getAllDeposits 실행 시간: " + (end - start) + "ms");
+        log.info("getAllDeposits 실행 시간: {}ms", (end - start));
 
         return products.stream().map(this::toResponse).toList();
     }
@@ -47,10 +51,10 @@ public class DepositQueryService {
         DepositProduct product = depositMapper.findByIdWithOptions(id);
         long end = System.currentTimeMillis();   // 종료 시간 측정
 
-        System.out.println("getDepositById 실행 시간: " + (end - start) + "ms");
+        log.info("getDepositById 실행 시간: {}ms", (end - start));
 
         if (product == null) {
-            throw new RuntimeException("예금 상품을 찾을 수 없습니다. (id=" + id + ")");
+            throw new BaseException(BaseResponseStatus.USER_NOT_FOUND); // 도메인 전용 상태가 있다면 교체 권장
         }
         return toResponse(product);
     }

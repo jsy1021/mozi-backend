@@ -1,6 +1,7 @@
 package org.iebbuda.mozi.domain.policy.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.iebbuda.mozi.domain.policy.domain.RegionCodeVO;
 import org.iebbuda.mozi.domain.policy.mapper.RegionCodeMapper;
 import org.iebbuda.mozi.domain.policy.util.RegionCodeApiCaller;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class RegionCodeServiceImpl implements RegionCodeService {
 
     private final RegionCodeMapper regionCodeMapper;
@@ -59,22 +61,22 @@ public class RegionCodeServiceImpl implements RegionCodeService {
                     regionCodeMapper.insertRegionCode(region);
                     count++;
                 } catch (Exception e) {
-                    System.out.printf("⚠️ 저장 실패: %s %s (%s)%n", sido, entry.getKey(), entry.getValue());
+                    log.warn("저장 실패: {} {} ({})", sido, entry.getKey(), entry.getValue());
                 }
             }
         }
 
-        System.out.println("저장 완료. 총 " + count + "개 저장됨.");
+        log.info("저장 완료. 총 {}개 저장됨.", count);
     }
 
     @PostConstruct
     public void initRegionCodeIfEmpty() {
         List<RegionCodeVO> list = regionCodeMapper.findAll();
         if (list.isEmpty()) {
-            System.out.println("RegionCode DB 비어 있음 → 외부 API로 자동 fetch 시작");
+            log.info("RegionCode DB 비어 있음 → 외부 API로 자동 fetch 시작");
             fetchAndSaveFromApi();
         } else {
-            System.out.println("RegionCode DB 이미 존재 → 자동 fetch 건너뜀");
+            log.info("RegionCode DB 이미 존재 → 자동 fetch 건너뜀");
         }
     }
 }

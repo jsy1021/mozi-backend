@@ -1,6 +1,7 @@
 package org.iebbuda.mozi.domain.policy.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.iebbuda.mozi.domain.policy.domain.PolicyVO;
 import org.iebbuda.mozi.domain.policy.dto.PolicyDTO;
 import org.iebbuda.mozi.domain.policy.dto.PolicyFilterDTO;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class PolicyServiceImpl implements PolicyService {
 
     private final PolicyMapper policyMapper;
@@ -57,7 +59,7 @@ public class PolicyServiceImpl implements PolicyService {
     // 서버 실행 시 자동으로 정책 API에서 전체 fetch 후 DB에 저장
     @PostConstruct
     public void initPolicyIfNeeded() {
-        System.out.println("YouthPolicy DB 자동 fetch 시작");
+        log.info("YouthPolicy DB 자동 fetch 시작");
 
         String json = apiCaller.getJsonResponse();
         List<PolicyDTO> dtoList = apiCaller.parseJsonToPolicies(json);
@@ -67,7 +69,7 @@ public class PolicyServiceImpl implements PolicyService {
         int after = policyMapper.count();
 
         int added = after - before;
-        System.out.printf("정책 자동 저장 완료: %d건 추가됨 (총 %d건)\n", added, after);
+        log.info("정책 자동 저장 완료: {}건 추가됨 (총 {}건)", added, after);
     }
 
     // 마감 임박 정책 조회
