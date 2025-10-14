@@ -59,23 +59,25 @@ public class RecommendServiceImpl implements RecommendService {
             int depositScore = 0;
             int savingsScore = 0;
 
-            // 달성률 기반 점수
-            if (achievementRate < 30) {
-                savingsScore += 30;
-            } else if (achievementRate > 70) {
-                depositScore += 30;
-            } else {
-                depositScore += 15;
-                savingsScore += 15;
-            }
-
-            // ✅ 목표 금액 기반 추가 보정
-            if (targetAmount.compareTo(new BigDecimal("1000000")) <= 0) {
+            // 1. 기간별 기본 추천 (가장 중요)
+            if (monthsLeft <= 6) {
+                depositScore += 40;  // 6개월 이하 → 예금 강력 추천 (유연한 출금)
+                log.info("[period-based] 단기 목표 ({}개월) → 예금 강력 추천", monthsLeft);
+            } else if (monthsLeft <= 12) {
+                depositScore += 30;  // 1년 이하 → 예금 우선, 적금 보조
                 savingsScore += 10;
-                log.info("[targetAmount adjust] 소액 목표 → 적금 점수 +10");
+                log.info("[period-based] 중단기 목표 ({}개월) → 예금 우선", monthsLeft);
+            } else if (monthsLeft <= 24) {
+                depositScore += 10;  // 1-2년 → 적금 우선, 예금 보조
+                savingsScore += 30;
+                log.info("[period-based] 중장기 목표 ({}개월) → 적금 우선", monthsLeft);
+            } else {
+                depositScore += 5;   // 2년 초과 → 적금 강력 추천 (복리 효과)
+                savingsScore += 35;
+                log.info("[period-based] 장기 목표 ({}개월) → 적금 강력 추천", monthsLeft);
             }
 
-            // 키워드 기반 세분화(+ 적금/예금 옵션)
+            // 2. 키워드별 세부 조정
             GoalVO.GoalKeyword keyword = goal.getKeyword();
             String rsrvType = null;             // 적금 전용: 정액(S) / 자유(F)
             String intrRateTypeSavings = null;  // 적금: 단리(S) / 복리(M)
@@ -84,70 +86,68 @@ public class RecommendServiceImpl implements RecommendService {
             if (keyword != null) {
                 switch (keyword) {
                     case MARRIAGE, HOME_PURCHASE -> {
-                        depositScore += 20;
-                        rsrvType = "S";
+                        savingsScore += 10;  // 장기 목표 → 적금 선호
+                        rsrvType = "S";      // 정액적금
                         
                         // 적금: 1년 이상이면 복리
                         intrRateTypeSavings = (monthsLeft >= 12) ? "M" : "S";
                         
-                        // 예금: 24개월 이상이면 복리 (예금 최대 36개월이므로)
+                        // 예금: 24개월 이상이면 복리
                         intrRateTypeDeposit = (monthsLeft >= 24) ? "M" : "S";
                         
-                        log.info("[keyword-adjust] {} -> 적금: {} ({}개월), 예금: {} ({}개월)", 
+                        log.info("[keyword-adjust] {} -> 장기 목표, 적금: {} ({}개월), 예금: {} ({}개월)", 
                                  keyword, intrRateTypeSavings, monthsLeft, intrRateTypeDeposit, monthsLeft);
                     }
                     case TRAVEL, HOBBY -> {
-                        savingsScore += 20;
+                        depositScore += 10;  // 단기 목표 → 예금 선호
                         
-                        // 적금: 기간별 이자 방식 최적화 (여행/취미는 대부분 단기)
-                        if (monthsLeft <= 12) {
-                            intrRateTypeSavings = "S";  // 1년 이하: 단리 (대부분의 경우)
-                        } else {
-                            intrRateTypeSavings = "M";  // 1년 초과: 복리 (드문 경우)
-                        }
+                        // 적금: 1년 이상이면 복리
+                        intrRateTypeSavings = (monthsLeft >= 12) ? "M" : "S";
                         
-                        // 예금: 기간별 이자 방식 최적화
-                        if (monthsLeft <= 12) {
-                            intrRateTypeDeposit = "S";  // 1년 이하: 단리
-                        } else {
-                            intrRateTypeDeposit = "M";  // 1년 초과: 복리
-                        }
+                        // 예금: 12개월 이상이면 복리
+                        intrRateTypeDeposit = (monthsLeft >= 12) ? "M" : "S";
                         
-                        log.info("[keyword-adjust] {} -> 단기 목표 주로 단리 적용, 적금: {} ({}개월), 예금: {} ({}개월)", 
+                        log.info("[keyword-adjust] {} -> 단기 목표, 적금: {} ({}개월), 예금: {} ({}개월)", 
                                  keyword, intrRateTypeSavings, monthsLeft, intrRateTypeDeposit, monthsLeft);
                     }
                     case EMPLOYMENT, EDUCATION_FUND -> {
-                        savingsScore += 20;
-                        rsrvType = "F";
+                        savingsScore += 10;  // 중기 목표 → 적금 선호
+                        rsrvType = "F";      // 자유적금
                         
-                        // 적금: 기간별 이자 방식 최적화
-                        if (monthsLeft <= 12) {
-                            intrRateTypeSavings = "S";  // 1년 이하: 단리
-                        } else {
-                            intrRateTypeSavings = "M";  // 1년 초과: 복리
-                        }
+                        // 적금: 1년 이상이면 복리
+                        intrRateTypeSavings = (monthsLeft >= 12) ? "M" : "S";
                         
-                        log.info("[keyword-adjust] {} -> 자유적립식 + 기간별 이자 방식, 적금: {} ({}개월)", 
-                                 keyword, intrRateTypeSavings, monthsLeft);
+                        // 예금: 12개월 이상이면 복리
+                        intrRateTypeDeposit = (monthsLeft >= 12) ? "M" : "S";
+                        
+                        log.info("[keyword-adjust] {} -> 중기 목표, 적금: {} ({}개월), 예금: {} ({}개월)", 
+                                 keyword, intrRateTypeSavings, monthsLeft, intrRateTypeDeposit, monthsLeft);
                     }
                 }
             }
 
-            // 월 납입 필요액 기반 보정 (방향 수정)
-            if (monthlyNeed.compareTo(new BigDecimal("1000000")) > 0) {
-                // 매달 고액을 모아야 하는 경우 → 적금 선호
-                savingsScore += 10;
-            } else if (monthlyNeed.signum() == 0) {
-                // 이미 목표 달성 → 여유 자금 단기 예치 선호
-                depositScore += 10;
-            } else {
-                // 기본적으로 소액 납입은 적금 우세
-                savingsScore += 5;
+            // 3. 달성률 기반 조정
+            if (achievementRate < 30) {
+                depositScore += 10;  // 달성률 낮음 → 예금 선호 (유연성)
+                log.info("[achievement-adjust] 낮은 달성률 ({}%) → 예금 선호", achievementRate);
+            } else if (achievementRate > 70) {
+                savingsScore += 10;  // 달성률 높음 → 적금 선호 (규칙성)
+                log.info("[achievement-adjust] 높은 달성률 ({}%) → 적금 선호", achievementRate);
             }
 
-            // 극단적 단기 목표 보정 (3개월 이하 → 예금 가산)
-            if (monthsLeft <= 3) {
-                depositScore += 5;
+            // 4. 목표 금액 기반 조정
+            if (targetAmount.compareTo(new BigDecimal("1000000")) <= 0) {
+                savingsScore += 5;  // 소액 목표 → 적금 선호 (정기 저축)
+                log.info("[amount-adjust] 소액 목표 ({}원) → 적금 선호", targetAmount);
+            }
+
+            // 5. 월 납입 필요액 기반 조정
+            if (monthlyNeed.signum() == 0) {
+                depositScore += 15;  // 이미 목표 달성 → 예금 선호
+                log.info("[monthly-adjust] 목표 달성 → 예금 선호");
+            } else if (monthlyNeed.compareTo(new BigDecimal("500000")) <= 0) {
+                savingsScore += 5;  // 소액 납입 → 적금 선호
+                log.info("[monthly-adjust] 소액 납입 ({}원) → 적금 선호", monthlyNeed);
             }
 
             // 비율 기반 개수 계산 (총 4개 보장)
